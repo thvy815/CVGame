@@ -74,21 +74,19 @@ for i in range(numberOfInsects):
 score_value = 0
 font = pygame.font.Font('freesansbold.ttf', 32)
 gameOver_font = pygame.font.Font('freesansbold.ttf', 100)
-textX = 10
-textY = 10
-def show_score(x, y):
+def show_score():
     score = font.render("Score : " + str(score_value), True, (255, 255, 255))
-    screen.blit(score, (x, y))
+    screen.blit(score, (100, 50))
 
 def show_timer():
-    if currentTime/1000 >= 80:
-        timer = font.render("Time: " + str(int(101 - currentTime / 1000)), True, (255, 0, 0))
+    if currentTime/1000 >= 60:
+        timer = font.render("Time: " + str(0), True, (255, 0, 0))
     else:
-        timer = font.render("Time: " + str(int(101 - currentTime/1000)), True, (255, 255, 255))
-    screen.blit(timer, (1210, 10))
-    if currentTime / 1000 >= 100:
-        gameOver = gameOver_font.render("Game Over!", True, (255, 0, 0))
-        screen.blit(gameOver, (width/2 - 300, height/2 - 30))
+        timer = font.render("Time: " + str(int(61 - currentTime/1000)), True, (255, 255, 255))
+    screen.blit(timer, (1120, 50))
+    if currentTime / 1000 >= 60:
+        timeOver = gameOver_font.render("Time Over!", True, (255, 0, 0))
+        screen.blit(timeOver, (width/2 - 300, height/2 - 30))
 
 
 indexes_for_closed_fingers = [8, 12, 16, 20]
@@ -179,7 +177,7 @@ while True:
         screen.blit(InsectImg[i], insect_rect[i])
 
     # showing texts
-    show_score(textX, textY)
+    show_score()
     currentTime = pygame.time.get_ticks()
     show_timer()
 
