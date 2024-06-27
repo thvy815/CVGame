@@ -42,8 +42,8 @@ backgroundImg = pygame.image.load('images/TennisBack.png').convert()
 # Player
 playerPosition = [370, 480]
 playerMovement = [0, 0]
-x = width/2 - 64
-y = height/2 - 64
+x = (width/2 - 64) 
+y = (height/2 - 64) 
 openHandImg = pygame.image.load('images/openHand.png').convert_alpha()
 openHandImg = pygame.transform.scale(openHandImg, (128, 128))
 openHand_rect = openHandImg.get_rect(topleft=(x, y))
@@ -73,19 +73,19 @@ for i in range(numberOfInsects):
  # Score Text
 score_value = 0
 font = pygame.font.Font('freesansbold.ttf', 32)
-gameOver_font = pygame.font.Font('freesansbold.ttf', 100)
+timeOver_font = pygame.font.Font('freesansbold.ttf', 100)
 def show_score():
-    score = font.render("Score : " + str(score_value), True, (255, 255, 255))
+    score = font.render("Score : " + str(score_value), True, (0, 0, 0))
     screen.blit(score, (100, 50))
 
 def show_timer():
     if currentTime/1000 >= 60:
         timer = font.render("Time: " + str(0), True, (255, 0, 0))
     else:
-        timer = font.render("Time: " + str(int(61 - currentTime/1000)), True, (255, 255, 255))
+        timer = font.render("Time: " + str(int(61 - currentTime/1000)), True, (0, 0, 0))
     screen.blit(timer, (1120, 50))
     if currentTime / 1000 >= 60:
-        timeOver = gameOver_font.render("Time Over!", True, (255, 0, 0))
+        timeOver = timeOver_font.render("Time Over!", True, (255, 0, 0))
         screen.blit(timeOver, (width/2 - 300, height/2 - 30))
 
 
@@ -113,9 +113,9 @@ while True:
         #Get the first hand detected
         lmList = hands[0]
         positionOfTheHand = lmList['lmList']
-        openHand_rect.left = (positionOfTheHand[9][0] - 200) * 1.5
+        openHand_rect.left = width - (positionOfTheHand[9][0] - 200) * 1.5
         openHand_rect.top = (positionOfTheHand[9][1] - 200) * 1.5
-        closedHand_rect.left = (positionOfTheHand[9][0] - 200) * 1.5
+        closedHand_rect.left = width - (positionOfTheHand[9][0] - 200) * 1.5
         closedHand_rect.top = (positionOfTheHand[9][1] - 200) * 1.5
 
         ## open or closed hand
@@ -154,7 +154,7 @@ while True:
     # Opencv Screen
     #frame = cv2.resize(frame, (0, 0), None, 0.3, 0.3)
     # It's something optional If you don't want to see your hand, omit this line of code
-    cv2.imshow("webcam", frame)
+    #cv2.imshow("webcam", frame)
 
     # Game screen
     ## placing Insects
@@ -162,18 +162,18 @@ while True:
     ## moving Insects
     for i in range(numberOfInsects):
             # moving X
-        insect_rect[i].right += insectMoveX[i]
+        insect_rect[i].right += insectMoveX[i] 
         if insect_rect[i].right <= 16:
-            insectMoveX[i] += 10
+            insectMoveX[i] += 10 
         elif insect_rect[i].right >= width:
-            insectMoveX[i] -= 10
+            insectMoveX[i] -= 10 
 
             # moving Y
-        insect_rect[i].top += insectMoveY[i]
+        insect_rect[i].top += insectMoveY[i] 
         if insect_rect[i].top <= 0:
-            insectMoveY[i] += 8
+            insectMoveY[i] += 8 
         elif insect_rect[i].top >= height-32:
-            insectMoveY[i] -= 8
+            insectMoveY[i] -= 8 
         screen.blit(InsectImg[i], insect_rect[i])
 
     # showing texts
