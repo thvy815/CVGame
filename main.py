@@ -4,6 +4,7 @@ import cv2
 from cvzone.HandTrackingModule import HandDetector
 import random
 from pygame import mixer
+import time
 
 width = 1366
 height = 768
@@ -70,27 +71,27 @@ for i in range(numberOfInsects):
     insectMoveY.append(8)
 
 ## Game Texts
+font = pygame.font.Font('freesansbold.ttf', 32)
+
  # Score Text
 score_value = 0
-font = pygame.font.Font('freesansbold.ttf', 32)
-timeOver_font = pygame.font.Font('freesansbold.ttf', 100)
 def show_score():
     score = font.render("Score : " + str(score_value), True, (0, 0, 0))
     screen.blit(score, (100, 50))
 
+ # Time Text
+countdown_time = 60
 def show_timer():
-    if currentTime/1000 >= 60:
-        timer = font.render("Time: " + str(0), True, (255, 0, 0))
-    else:
-        timer = font.render("Time: " + str(int(61 - currentTime/1000)), True, (0, 0, 0))
+    timer = font.render("Time: " + str(int(currentTime)), True, (0, 0, 0))
     screen.blit(timer, (1120, 50))
-    if currentTime / 1000 >= 60:
-        timeOver = timeOver_font.render("Time Over!", True, (255, 0, 0))
-        screen.blit(timeOver, (width/2 - 300, height/2 - 30))
-
+    
+ # Menu
+menu_options = ['Start Game', 'Quit']
+menu_state = 'main_menu'
+game_state = 'not_started'
 
 indexes_for_closed_fingers = [8, 12, 16, 20]
-################################################################################################## Game Loop
+########## Game Loop ##########
 catch_insect_with_openHand = False
 fingers = [0, 0, 0, 0]
 while True:
@@ -102,54 +103,92 @@ while True:
             cv2.destroyAllWindows()
             pygame.quit()
             sys.exit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if menu_state == 'main_menu':
+                 # Start Game
+                if event.pos[0] > width/2 - 100 and event.pos[0] < width/2 + 100 and event.pos[1] > height/2 - 50 and event.pos[1] < height/2:
+                    menu_state = 'game'
+                    game_state = 'started'
+                    start_time = time.time()
+                 # Quit
+                elif event.pos[0] > width/2 - 100 and event.pos[0] < width/2 + 100 and event.pos[1] > height/2 and event.pos[1] < height/2 + 50:
+                    cap.release()
+                    cv2.destroyAllWindows()
+                    pygame.quit()
+                    sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN and game_state == 'finished':
+                menu_state = 'main_menu'
+                game_state = 'not_started'
+    
+    # showing menu
+    if menu_state == 'main_menu':
+        title = font.render('Catch Ball', True, (0, 0, 0))
+        screen.blit(title, (width/2 - title.get_width()/2, height/2 - 100))
+        for i, option in enumerate(menu_options):
+            text = font.render(option, True, (0, 0, 0))
+            screen.blit(text, (width/2 - title.get_width()/2, height/2 - 25 + i * 50))    
+    elif menu_state == 'game':
+        if game_state == 'started':  
 
-    # opencv code
-    success, frame = cap.read()
-    # Mediapipe code for hand detection and Landmarks
-    hands, frame = detector.findHands(frame)
-
-    # Landmarks value - (x,y,z) * 21
-    if hands:
-        #Get the first hand detected
-        lmList = hands[0]
-        positionOfTheHand = lmList['lmList']
-        openHand_rect.left = width - (positionOfTheHand[9][0] - 200) * 1.5
-        openHand_rect.top = (positionOfTheHand[9][1] - 200) * 1.5
-        closedHand_rect.left = width - (positionOfTheHand[9][0] - 200) * 1.5
-        closedHand_rect.top = (positionOfTheHand[9][1] - 200) * 1.5
-
-        ## open or closed hand
-        hand_is_closed = 0 #for playing the sound once when hand is closed
-        for index in range(0, 4):
-            if positionOfTheHand[indexes_for_closed_fingers[index]][1] > positionOfTheHand[indexes_for_closed_fingers[index] - 2][1]:
-                fingers[index] = 1
+            # showing texts
+            show_score()
+            currentTime = countdown_time - (time.time() - start_time)
+            if currentTime <= 0: 
+                game_state = 'finished'
             else:
-                fingers[index] = 0
-            if fingers[0]*fingers[1]*fingers[2]*fingers[3]:
-                # playing close hand sound
-                if hand_is_closed and catch_insect_with_openHand == False:
-                    closedHand_sound.play()
-                hand_is_closed = 0
-                screen.blit(closedHandImg, closedHand_rect)
-                # detect catching
-                for iteration in range(numberOfInsects):
-                    if openHand_rect.colliderect(insect_rect[iteration]) and catch_insect_with_openHand:
-                        score_value += 1
-                        catching_sound.play()
-                        catch_insect_with_openHand = False
-                        insect_rect[iteration] = InsectImg[iteration].get_rect(topleft=(random.randint(0, 1366), random.randint(0, 768)))
+                show_timer()
 
-                catch_insect_with_openHand = False
-            else:
-                screen.blit(openHandImg, openHand_rect)
-                hand_is_closed = 1
-                for iterate in range(numberOfInsects):
-                    if openHand_rect.colliderect(insect_rect[iterate]):
-                        catch_insect_with_openHand = True
+                # opencv code
+                success, frame = cap.read()
 
+                # Mediapipe code for hand detection and Landmarks
+                hands, frame = detector.findHands(frame)
 
+                # Landmarks value - (x,y,z) * 21
+                if hands:
+                    #Get the first hand detected
+                    lmList = hands[0]
+                    positionOfTheHand = lmList['lmList']
+                    openHand_rect.left = width - (positionOfTheHand[9][0] - 200) * 1.5
+                    openHand_rect.top = (positionOfTheHand[9][1] - 200) * 1.5
+                    closedHand_rect.left = width - (positionOfTheHand[9][0] - 200) * 1.5
+                    closedHand_rect.top = (positionOfTheHand[9][1] - 200) * 1.5
 
+                    ## open or closed hand
+                    hand_is_closed = 0 #for playing the sound once when hand is closed
+                    for index in range(0, 4):
+                        if positionOfTheHand[indexes_for_closed_fingers[index]][1] > positionOfTheHand[indexes_for_closed_fingers[index] - 2][1]:
+                            fingers[index] = 1
+                        else:
+                            fingers[index] = 0
+                        if fingers[0]*fingers[1]*fingers[2]*fingers[3]:
+                            # playing close hand sound
+                            if hand_is_closed and catch_insect_with_openHand == False:
+                                closedHand_sound.play()
+                            hand_is_closed = 0
+                            screen.blit(closedHandImg, closedHand_rect)
+                            # detect catching
+                            for iteration in range(numberOfInsects):
+                                if openHand_rect.colliderect(insect_rect[iteration]) and catch_insect_with_openHand:
+                                    score_value += 1
+                                    catching_sound.play()
+                                    catch_insect_with_openHand = False
+                                    insect_rect[iteration] = InsectImg[iteration].get_rect(topleft=(random.randint(0, 1366), random.randint(0, 768)))
 
+                            catch_insect_with_openHand = False
+                        else:
+                            screen.blit(openHandImg, openHand_rect)
+                            hand_is_closed = 1
+                            for iterate in range(numberOfInsects):
+                                if openHand_rect.colliderect(insect_rect[iterate]):
+                                    catch_insect_with_openHand = True
+        elif game_state == 'finished':
+            timeOver_font = pygame.font.Font('freesansbold.ttf', 100)
+            timeOver = timeOver_font.render("Time Over!", True, (255, 0, 0))
+            screen.blit(timeOver, (width/2 - 300, height/2 - 30))
+            show_score()
+            pygame.display.flip()
 
     # Opencv Screen
     #frame = cv2.resize(frame, (0, 0), None, 0.3, 0.3)
@@ -175,11 +214,6 @@ while True:
         elif insect_rect[i].top >= height-32:
             insectMoveY[i] -= 8 
         screen.blit(InsectImg[i], insect_rect[i])
-
-    # showing texts
-    show_score()
-    currentTime = pygame.time.get_ticks()
-    show_timer()
 
     # display update
     pygame.display.update()
