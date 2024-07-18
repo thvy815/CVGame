@@ -36,7 +36,7 @@ currentTime = 1
 
 # Title and Icon
 pygame.display.set_caption("Catch Ball")
-icon = pygame.image.load('images/ball_32.png').convert_alpha()
+icon = pygame.image.load('images/ball_32_1.png').convert_alpha()
 pygame.display.set_icon(icon)
 backgroundImg = pygame.image.load('images/TennisBack.png').convert()
 
@@ -64,7 +64,7 @@ numberOfInsects = 10
 for i in range(numberOfInsects):
     InsectX.append(random.randint(0, 1366))
     InsectY.append(random.randint(0, 768))
-    InsectImg.append(pygame.image.load('images/ball_32.png').convert_alpha())
+    InsectImg.append(pygame.image.load('images/ball_32_1.png').convert_alpha())
     #InsectImg.append(pygame.transform.scale(InsectImg, (32, 32)))
     insect_rect.append(InsectImg[i].get_rect(topleft=(InsectX[i], InsectY[i])))
     insectMoveX.append(10)
@@ -110,6 +110,7 @@ while True:
                     menu_state = 'game'
                     game_state = 'started'
                     start_time = time.time()
+                    score_value = 0
                  # Quit
                 elif event.pos[0] > width/2 - 100 and event.pos[0] < width/2 + 100 and event.pos[1] > height/2 and event.pos[1] < height/2 + 50:
                     cap.release()
@@ -123,7 +124,7 @@ while True:
     
     # showing menu
     if menu_state == 'main_menu':
-        title = font.render('Catch Ball', True, (0, 0, 0))
+        title = font.render('CATCH BALL', True, (0, 0, 0))
         screen.blit(title, (width/2 - title.get_width()/2, height/2 - 100))
         for i, option in enumerate(menu_options):
             text = font.render(option, True, (0, 0, 0))
@@ -189,7 +190,7 @@ while True:
             screen.blit(timeOver, (width/2 - 300, height/2 - 30))
             show_score()
             pygame.display.flip()
-
+            
     # Opencv Screen
     #frame = cv2.resize(frame, (0, 0), None, 0.3, 0.3)
     # It's something optional If you don't want to see your hand, omit this line of code
@@ -218,3 +219,4 @@ while True:
     # display update
     pygame.display.update()
     clock.tick(60)
+    
